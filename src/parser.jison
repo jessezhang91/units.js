@@ -28,6 +28,7 @@
 /* operator associations and precedence */
 
 %left UNITGROUP
+%left UNITDIVIDE
 %left '+' '-'
 %left '*' '/'
 %left UMINUS
@@ -111,7 +112,7 @@ ng
 	;
 
 u
-	: u '/' u
+	: u '/' u %prec UNITDIVIDE
 		{
 			$$ = units._udivide($1, $3);
 		}

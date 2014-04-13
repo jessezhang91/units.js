@@ -1,6 +1,6 @@
 (function (global) {
-	var units = global.units = (global.module || {}).exports = function () {
-
+	var units = global.units = (global.module || {}).exports = function (expression) {
+		return units._eval(expression);
 	};
 
 	var PREFIXES, BASE_UNIT, DERIVED_UNIT, CONVERSION;
@@ -12,8 +12,6 @@
 	 * Arithmetic Operations
 	 */
 	units._add = function (a, b) {
-		units._sameUnits
-		console.log(a.unit, b.unit);
 		return {
 			value: a.value + b.value,
 			unit: a.unit
@@ -56,8 +54,7 @@
 			c.push({
 				symbol: u.symbol,
 				power: -u.power,
-				prefix: u.prefix,
-				si: u.si
+				prefix: u.prefix
 			});
 		});
 		return c;
@@ -68,8 +65,7 @@
 			c.push({
 				symbol: u.symbol,
 				power: u.power * n,
-				prefix: u.prefix,
-				si: u.si
+				prefix: u.prefix
 			});
 		});
 		return c;
@@ -79,8 +75,7 @@
 	 * Unit parsing
 	 */
 	units._parseUnit = function (u) {
-		var match, symbol, prefix = 0,
-			si = false;
+		var match, symbol, prefix = 0;
 
 		match = RegExp("^" + NONSI_UNIT_NAME_LIST_REGEX + "$", "i").exec(u);
 		if (match) {
@@ -107,7 +102,6 @@
 				if (match) {
 					prefix = (prefix || {}).value || 0;
 					symbol = match.symbol;
-					si = true;
 				}
 			}
 		}
@@ -119,7 +113,6 @@
 				if (match) {
 					prefix = (prefix || {}).value || 0;
 					symbol = match.symbol;
-					si = true;
 				}
 			}
 		}
@@ -131,8 +124,7 @@
 		return [{
 			symbol: symbol,
 			power: 1,
-			prefix: prefix,
-			si: si
+			prefix: prefix
 		}];
 	};
 
@@ -140,14 +132,70 @@
 	 * Unit conversion
 	 */
 	units._convert = function (ng, u) {
-
+		console.log(units._conversion(ng.unit));
+		return ng;
 	};
 
 	/*
 	 * unit * factor = SI
 	 */
-	units._conversionFactor = function (u) {
+	units._conversion = function (u) {
+		var si = {}, factor = 1,
+			offset = 0,
+			prefix = 0,
+			dimensions;
+		u.forEach(function (a) {
+			var m = UNIT_MAP[a.symbol];
+			switch (m.type) {
+			case "derived":
+				m.equivalent.forEach(function (e) {
+					si[e.symbol] = (si[e.symbol] || 0) + a.power * e.power;
+				});
+				prefix += Number(m.prefix) * a.power;
+				break;
+			case "conversion":
+				si[m.conversion.unit] = (si[m.conversion.unit] || 0) + a.power;
+				if (a.power == 1) {
+					offset += Number(m.conversion.offset);
+				}
+				factor *= Math.pow(Number(m.conversion.factor), a.power);
+				break;
+			case "base":
+				si[a.symbol] = (si[a.symbol] || 0) + a.power;
+				break;
+			default:
+				throw new Error("Invalid unit `" + a.symbol + "`");
+			}
+			prefix += a.prefix * a.power;
+		});
 
+		var si_array = [];
+		Object.keys(si).forEach(function (s) {
+			si_array.push({
+				symbol: s,
+				power: si[s]
+			});
+		});
+		dimensions = units._dimensions(si_array);
+
+		return {
+			factor: factor,
+			prefix: prefix,
+			offset: offset,
+			dimensions: dimensions
+		};
+	};
+
+	/*
+	 * Unit dimensions (must be all SI base units)
+	 */
+	units._dimensions = function (u) {
+		var dim = {};
+		u.forEach(function (a) {
+			var m = UNIT_MAP[a.symbol];
+			dim[m.dimension] = (dim[m.dimension] || 0) + a.power;
+		});
+		return dim;
 	};
 
 
@@ -704,6 +752,7 @@
 		var map = {};
 		Object.keys(PREFIXES).map(function (key) {
 			var i, l = (PREFIXES[key].aliases || []).length;
+			PREFIXES[key].type = "prefix";
 			map[key] = PREFIXES[key];
 			map[PREFIXES[key].symbol] = PREFIXES[key];
 			for (i = 0; i < l; i++) {
@@ -717,6 +766,7 @@
 		var map = {};
 		Object.keys(BASE_UNIT).map(function (key) {
 			var i, l = (BASE_UNIT[key].aliases || []).length;
+			BASE_UNIT[key].type = "base";
 			map[key] = BASE_UNIT[key];
 			map[BASE_UNIT[key].symbol] = BASE_UNIT[key];
 			for (i = 0; i < l; i++) {
@@ -725,6 +775,7 @@
 		});
 		Object.keys(DERIVED_UNIT).map(function (key) {
 			var i, l = (DERIVED_UNIT[key].aliases || []).length;
+			DERIVED_UNIT[key].type = "derived";
 			map[key] = DERIVED_UNIT[key];
 			map[DERIVED_UNIT[key].symbol] = DERIVED_UNIT[key];
 			for (i = 0; i < l; i++) {
@@ -733,6 +784,7 @@
 		});
 		Object.keys(CONVERSION).map(function (key) {
 			var i, l = (CONVERSION[key].aliases || []).length;
+			CONVERSION[key].type = "conversion";
 			map[key] = CONVERSION[key];
 			map[CONVERSION[key].symbol] = CONVERSION[key];
 			for (i = 0; i < l; i++) {
@@ -741,4 +793,76 @@
 		});
 		return map;
 	})();
+
+	// TEMPORARY: This has to go after parser definition
+	setTimeout(function () {
+		Object.keys(DERIVED_UNIT).map(function (key) {
+			if (DERIVED_UNIT[key].equivalent == "") {
+				DERIVED_UNIT[key].equivalent = [];
+			} else {
+				DERIVED_UNIT[key].equivalent = units._parser.parse(DERIVED_UNIT[key].equivalent);
+			}
+			DERIVED_UNIT[key].prefix = 0;
+		});
+
+		// Expand derived^n units
+		var hasDerived = true;
+		while (hasDerived) {
+			hasDerived = false;
+			Object.keys(DERIVED_UNIT).map(function (key) {
+				var equiv = DERIVED_UNIT[key].equivalent;
+				var prefix = DERIVED_UNIT[key].prefix;
+				var e, m, md, i, l = equiv.length;
+				for (i = 0; i < l; i++) {
+					e = equiv[i];
+					m = UNIT_MAP[e.symbol];
+					if (m.type == "derived") {
+						hasDerived = true;
+						equiv.splice(i, 1);
+						i--;
+						l--;
+
+						md = UNIT_MAP[m.symbol];
+						md.equivalent.forEach(function (mde) {
+							equiv.push({
+								power: mde.power * e.power,
+								prefix: mde.prefix,
+								symbol: mde.symbol
+							});
+							l++;
+						});
+						prefix += (e.prefix + md.prefix) * e.power;
+					}
+				}
+
+				// Simplify
+				var umap = {}, um;
+				for (i = 0; i < l; i++) {
+					e = equiv[i];
+					um = umap[e.symbol] || {
+						power: 0,
+						prefix: 0,
+						symbol: e.symbol
+					};
+					um.power += e.power;
+					prefix += e.prefix * e.power;
+					umap[e.symbol] = um;
+				}
+
+				equiv = [];
+				Object.keys(umap).forEach(function (k) {
+					um = umap[k];
+					if (um.power != 0) {
+						equiv.push(umap[k]);
+					}
+				});
+				DERIVED_UNIT[key].equivalent = equiv;
+				DERIVED_UNIT[key].prefix = prefix;
+			});
+		}
+
+		units._eval = function (expression) {
+			return units._parser.parse(expression);
+		};
+	});
 })(this);
