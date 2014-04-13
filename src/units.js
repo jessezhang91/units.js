@@ -132,8 +132,11 @@
 	 * Unit conversion
 	 */
 	units._convert = function (ng, u) {
-		console.log(units._conversion(ng.unit));
-		return ng;
+		var conversion = units._conversion(ng.unit);
+		return {
+			value: ng.value * conversion.factor * Math.pow(10, conversion.prefix),
+			unit: conversion.si
+		};
 	};
 
 	/*
@@ -155,7 +158,7 @@
 				break;
 			case "conversion":
 				si[m.conversion.unit] = (si[m.conversion.unit] || 0) + a.power;
-				if (a.power == 1) {
+				if (a.power == 1 && u.length == 1) {
 					offset += Number(m.conversion.offset);
 				}
 				factor *= Math.pow(Number(m.conversion.factor), a.power);
@@ -173,7 +176,8 @@
 		Object.keys(si).forEach(function (s) {
 			si_array.push({
 				symbol: s,
-				power: si[s]
+				power: si[s],
+				prefix: 0
 			});
 		});
 		dimensions = units._dimensions(si_array);
@@ -182,7 +186,8 @@
 			factor: factor,
 			prefix: prefix,
 			offset: offset,
-			dimensions: dimensions
+			dimensions: dimensions,
+			si: si_array
 		};
 	};
 
@@ -194,6 +199,11 @@
 		u.forEach(function (a) {
 			var m = UNIT_MAP[a.symbol];
 			dim[m.dimension] = (dim[m.dimension] || 0) + a.power;
+		});
+		Object.keys(dim).forEach(function (d) {
+			if (dim[d] == 0) {
+				delete dim[d];
+			}
 		});
 		return dim;
 	};
@@ -468,7 +478,7 @@
 			conversion: {
 				unit: "s",
 				factor: "60",
-				offset: null
+				offset: 0
 			},
 			aliases: []
 		},
@@ -477,7 +487,7 @@
 			conversion: {
 				unit: "s",
 				factor: "3600",
-				offset: null
+				offset: 0
 			},
 			aliases: []
 		},
@@ -486,7 +496,7 @@
 			conversion: {
 				unit: "s",
 				factor: "86400",
-				offset: null
+				offset: 0
 			},
 			aliases: []
 		},
@@ -497,7 +507,7 @@
 			conversion: {
 				unit: "m",
 				factor: "2.54e-5",
-				offset: null
+				offset: 0
 			},
 			aliases: []
 		},
@@ -506,7 +516,7 @@
 			conversion: {
 				unit: "m",
 				factor: "0.0254",
-				offset: null
+				offset: 0
 			},
 			aliases: [
 				"inches"
@@ -517,7 +527,7 @@
 			conversion: {
 				unit: "m",
 				factor: "0.3048",
-				offset: null
+				offset: 0
 			},
 			aliases: [
 				"feet"
@@ -528,7 +538,7 @@
 			conversion: {
 				unit: "m",
 				factor: "0.9144",
-				offset: null
+				offset: 0
 			},
 			aliases: []
 		},
@@ -537,7 +547,7 @@
 			conversion: {
 				unit: "m",
 				factor: "1609.344",
-				offset: null
+				offset: 0
 			},
 			aliases: []
 		},
@@ -548,7 +558,7 @@
 			conversion: {
 				unit: "L",
 				factor: "0.473176473",
-				offset: null
+				offset: 0
 			},
 			aliases: []
 		},
@@ -557,7 +567,7 @@
 			conversion: {
 				unit: "L",
 				factor: "0.946352946",
-				offset: null
+				offset: 0
 			},
 			aliases: []
 		},
@@ -566,7 +576,7 @@
 			conversion: {
 				unit: "L",
 				factor: "3.785411784",
-				offset: null
+				offset: 0
 			},
 			aliases: []
 		},
@@ -577,7 +587,7 @@
 			conversion: {
 				unit: "g",
 				factor: "28.349523125",
-				offset: null
+				offset: 0
 			},
 			aliases: []
 		},
@@ -586,7 +596,7 @@
 			conversion: {
 				unit: "g",
 				factor: "453.59237",
-				offset: null
+				offset: 0
 			},
 			aliases: []
 		},
@@ -595,7 +605,7 @@
 			conversion: {
 				unit: "g",
 				factor: "907184.74",
-				offset: null
+				offset: 0
 			},
 			aliases: []
 		},
@@ -606,7 +616,7 @@
 			conversion: {
 				unit: "Pa",
 				factor: "1e5",
-				offset: null
+				offset: 0
 			},
 			aliases: []
 		},
@@ -615,7 +625,7 @@
 			conversion: {
 				unit: "Pa",
 				factor: "1.01325e5",
-				offset: null
+				offset: 0
 			},
 			aliases: []
 		},
@@ -624,7 +634,7 @@
 			conversion: {
 				unit: "Pa",
 				factor: "133.3224",
-				offset: null
+				offset: 0
 			},
 			aliases: []
 		},
@@ -633,7 +643,7 @@
 			conversion: {
 				unit: "Pa",
 				factor: "6.8948e3",
-				offset: null
+				offset: 0
 			},
 			aliases: []
 		},
