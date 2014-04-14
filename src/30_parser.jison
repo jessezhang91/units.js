@@ -4,36 +4,36 @@
 %lex
 %%
 
-\s*\n\s*				// Ignore
-[0-9]+("."[0-9]+)?\b	return 'NUMBER'
-\s*"*"\s*				return '*'
-\s*"/"\s*				return '/'
-\s*"-"\s*				return '-'
-\s*"+"\s*				return '+'
-\s*"^"\s*				return '^'
-"("\s*					return '('
-\s*")"					return ')'
-"["\s*					return '['
-\s*"]"					return ']'
-"{"\s*					return '{'
-\s*"}"					return '}'
-[A-Za-z]+				return 'UNIT'
-"in"					return 'in'
-\s+						return 'SEP'
-<<EOF>>					return 'EOF'
-.						return 'INVALID'
+\s*\n\s*										// Ignore
+[0-9]+("."[0-9]+)?([eE][\+\-]?[0-9]+)?\b		return 'NUMBER'
+\s*"*"\s*										return '*'
+\s*"/"\s*										return '/'
+\s*"-"\s*										return '-'
+\s*"+"\s*										return '+'
+\s*"^"\s*										return '^'
+"("\s*											return '('
+\s*")"											return ')'
+"["\s*											return '['
+\s*"]"											return ']'
+"{"\s*											return '{'
+\s*"}"											return '}'
+[A-Za-z]+										return 'UNIT'
+\s+"in"\s+										return 'in'
+\s+												return 'SEP'
+<<EOF>>											return 'EOF'
+.												return 'INVALID'
 
 /lex
 
 /* operator associations and precedence */
 
+%left 'in'
 %left UNITGROUP
 %left UNITDIVIDE
 %left '+' '-'
 %left '*' '/'
 %left UMINUS
 %left '^'
-%left 'in'
 
 %start expression
 
@@ -42,8 +42,7 @@
 expression
 	: ng 'in' u EOF
 		{
-			$1.unit = u;
-			return $1;
+			return units_convert($1, $3);
 		}
 	| ng EOF
 		{
@@ -51,30 +50,33 @@ expression
 		}
 	| u EOF
 		{
-			return $1;
+			return units_convert({
+				value: 1,
+				unit: $1
+			}).unit;
 		}
 	;
 
 ng
 	: ng '+' ng
 		{
-			$$ = units._add($1, $3);
+			$$ = units_add($1, $3);
 		}
 	| ng '-' ng
 		{
-			$$ = units._subtract($1, $3);
+			$$ = units_subtract($1, $3);
 		}
 	| ng '*' ng
 		{
-			$$ = units._times($1, $3);
+			$$ = units_times($1, $3);
 		}
 	| ng '/' ng
 		{
-			$$ = units._divide($1, $3);
+			$$ = units_divide($1, $3);
 		}
 	| ng '^' n
 		{
-			$$ = units._power($1, $3);
+			$$ = units_power($1, $3);
 		}
 	| '-' ng %prec UMINUS
 		{
@@ -97,7 +99,7 @@ ng
 		}
 	| NUMBER SEP u %prec UNITGROUP
 		{
-			$$ = units._convert({
+			$$ = units_convert({
 				value: Number($1),
 				unit: $3
 			});
@@ -114,23 +116,19 @@ ng
 u
 	: u '/' u %prec UNITDIVIDE
 		{
-			$$ = units._udivide($1, $3);
-		}
-	| u '-' u
-		{
-			$$ = units._utimes($1, $3);
+			$$ = units_udivide($1, $3);
 		}
 	| u '*' u
 		{
-			$$ = units._utimes($1, $3);
+			$$ = units_utimes($1, $3);
 		}
 	| u '^' NUMBER %prec UNITPOWER
 		{
-			$$ = units._upower($1, Number($3));
+			$$ = units_upower($1, Number($3));
 		}
 	| u '^' '-' NUMBER %prec UNITPOWER
 		{
-			$$ = units._upower($1, -Number($4));
+			$$ = units_upower($1, -Number($4));
 		}
 	| '(' u ')'
 		{
@@ -138,6 +136,6 @@ u
 		}
 	| UNIT
 		{
-			$$ = units._parseUnit($1);
+			$$ = units_parseUnit($1);
 		}
 	;
