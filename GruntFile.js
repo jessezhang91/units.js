@@ -17,7 +17,7 @@ module.exports = function (grunt) {
 			},
 			dist: {
 				src: require("glob").sync("./src/*.js"),
-				dest: 'dist/units.js'
+				dest: 'dist/units.pre.js'
 			}
 		},
 		uglify: {
@@ -28,7 +28,7 @@ module.exports = function (grunt) {
 			},
 			dist: {
 				files: {
-					'dist/units.min.js': ['dist/units.js']
+					'dist/units.min.js': ['dist/units.pre.js']
 				}
 			},
 			distBeautify: {
@@ -38,7 +38,7 @@ module.exports = function (grunt) {
 					beautify: true
 				},
 				files: {
-					'dist/units.js': ['dist/units.js']
+					'dist/units.js': ['dist/units.pre.js']
 				}
 			}
 		},
@@ -49,7 +49,17 @@ module.exports = function (grunt) {
 			},
 			dev: {
 				files: ['src/**.jison', 'src/**.js'],
-				tasks: ['jison', 'concat']
+				tasks: ['dev']
+			}
+		},
+		blanket_mocha: {
+			dist: {
+				src: ['test/*.html'],
+				options: {
+					threshold: 50,
+					log: true,
+					logErrors: true
+				}
 			}
 		}
 	});
@@ -58,6 +68,10 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-jison');
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.loadNpmTasks('grunt-blanket-mocha');
 
-	grunt.registerTask('default', ['jison', 'concat', 'uglify']);
+	grunt.registerTask('test', ['blanket_mocha']);
+	grunt.registerTask('dev', ['jison', 'concat', 'blanket_mocha']);
+	grunt.registerTask('dist', ['jison', 'concat', 'uglify', 'blanket_mocha']);
+	grunt.registerTask('default', ['dist']);
 };

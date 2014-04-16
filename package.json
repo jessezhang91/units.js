@@ -9,7 +9,11 @@
 		"grunt-contrib-uglify": "~0.4.0",
 		"grunt-contrib-watch": "~0.6.1",
 		"grunt-jison": "~1.2.1",
-		"glob": "~3.2.9"
+		"glob": "~3.2.9",
+		"grunt-blanket-mocha": "~0.4.0",
+		"mocha": "~1.18.2",
+		"blanket": "~1.1.6",
+		"chai": "~1.9.1"
 	},
 	"repository": {
 		"type": "git",

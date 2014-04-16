@@ -74,9 +74,9 @@ ng
 		{
 			$$ = units_divide($1, $3);
 		}
-	| ng '^' n
+	| ng '^' NUMBER
 		{
-			$$ = units_power($1, $3);
+			$$ = units_power($1, Number($3));
 		}
 	| '-' ng %prec UMINUS
 		{
