@@ -18,7 +18,7 @@
 "{"\s*											return '{'
 \s*"}"											return '}'
 [A-Za-z]+										return 'UNIT'
-\s+"in"\s+										return 'in'
+\s+"to"\s+										return 'to'
 \s+												return 'SEP'
 <<EOF>>											return 'EOF'
 .												return 'INVALID'
@@ -27,7 +27,7 @@
 
 /* operator associations and precedence */
 
-%left 'in'
+%left 'to'
 %left UNITGROUP
 %left UNITDIVIDE
 %left '+' '-'
@@ -40,7 +40,7 @@
 %% /* language grammar */
 
 expression
-	: ng 'in' u EOF
+	: ng 'to' u EOF
 		{
 			return units_convert($1, $3);
 		}

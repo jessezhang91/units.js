@@ -141,6 +141,9 @@ var units_convert = function (ng, u) {
 		};
 	}
 	var to = units_conversion(u);
+	if (!units_sameDimensions(conversion.si, to.si)) {
+		throw new Error("Dimension mismatch. " + units_toUnitString(ng.unit) + "  =/=>  " + units_toUnitString(u));
+	}
 	return {
 		value: (value - to.offset) / (to.factor * Math.pow(10, to.prefix)),
 		unit: u
@@ -162,6 +165,7 @@ var units_conversion = function (u) {
 			m.equivalent.forEach(function (e) {
 				si[e.symbol] = (si[e.symbol] || 0) + a.power * e.power;
 			});
+			factor *= Math.pow(Number(m.factor), a.power);
 			prefix += Number(m.prefix) * a.power;
 			break;
 		case "conversion":
@@ -245,10 +249,10 @@ var units_toString = function (ng) {
 	if (ustr.indexOf("10^") == 0) {
 		ustr = " * " + ustr;
 	}
-	return vstr + " " + ustr;
+	return vstr + (ustr ? " " + ustr : "");
 };
 var units_toValueString = function (v) {
-	return Number(Number(v).toPrecision(15));
+	return String(Number(Number(v).toPrecision(15)));
 };
 var units_toUnitString = function (u) {
 	var m = {}, prefix = 0;
@@ -284,10 +288,18 @@ var units_toUnitString = function (u) {
 		}
 	});
 	n = n.sort(function (a, b) {
-		return a.power > b.power ? 1 : -1;
+		if (a.power == b.power) {
+			return a.symbol > b.symbol ? 1 : -1;
+		} else {
+			return a.power > b.power ? 1 : -1;
+		}
 	});
 	d = d.sort(function (a, b) {
-		return a.power < b.power ? 1 : -1;
+		if (a.power == b.power) {
+			return a.symbol > b.symbol ? 1 : -1;
+		} else {
+			return a.power < b.power ? 1 : -1;
+		}
 	});
 
 	var str = [];
@@ -319,7 +331,7 @@ var units_toUnitString = function (u) {
 		if (n.length > 0) {
 			str.push("/");
 		}
-		if (d.length > 1 && d.length != 0) {
+		if (n.length > 0 && d.length > 1 && d.length != 0) {
 			str.push("(");
 		}
 		d.forEach(function (u, i) {
@@ -335,7 +347,7 @@ var units_toUnitString = function (u) {
 				str.push("^" + u.power);
 			}
 		});
-		if (d.length > 1 && d.length != 0) {
+		if (n.length > 0 && d.length > 1 && d.length != 0) {
 			str.push(")");
 		}
 	}
@@ -347,21 +359,59 @@ var units_toPrefixString = function (p) {
 };
 
 /*
+ * Handle gram to kilogram prefix issue
+ */
+var units_fixKilogram = function (e) {
+	if (e.unit) {
+		e.unit.forEach(function (u) {
+			if (u.symbol == "g" && u.prefix == 0) {
+				u.prefix = 3;
+				e.value /= Math.pow(10, u.power * 3);
+			}
+		});
+	} else {
+		// Just units
+		e.forEach(function (u) {
+			if (u.symbol == "g" && u.prefix == 0) {
+				u.prefix = 3;
+			}
+		});
+	}
+
+	return e;
+};
+
+/*
  * Eval
  */
 var units_eval = function (expression) {
 	var out = parser.parse(expression);
-	out.toString = function () {
-		return units_toString(out);
-	};
-	out.toValueString = function () {
-		return units_toValueString(out.value);
-	};
-	out.toUnitString = function () {
-		return units_toUnitString(out.unit);
-	};
-	out.toJSONString = function () {
-		return '{"value":' + out.toValueString() + ',"unit":"' + out.toUnitString() + '"}';
-	};
+	out = units_fixKilogram(out);
+
+	if (out.unit) {
+		out.toString = function () {
+			return units_toString(out);
+		};
+		out.toValueString = function () {
+			return units_toValueString(out.value);
+		};
+		out.toUnitString = function () {
+			return units_toUnitString(out.unit);
+		};
+		out.toJSONString = function () {
+			return '{"value":' + out.toValueString() + ',"unit":"' + out.toUnitString() + '"}';
+		};
+	} else {
+		// Just units
+		out.toString = function () {
+			return out.toUnitString();
+		};
+		out.toUnitString = function () {
+			return units_toUnitString(out);
+		};
+		out.toJSONString = function () {
+			return '"' + out.toUnitString() + '"';
+		};
+	}
 	return out;
 };

@@ -152,7 +152,9 @@ Object.keys(DERIVED_UNIT).forEach(function (key) {
 	if (DERIVED_UNIT[key].equivalent == "") {
 		DERIVED_UNIT[key].equivalent = [];
 	} else {
-		DERIVED_UNIT[key].equivalent = parser.parse(DERIVED_UNIT[key].equivalent);
+		var u = parser.parse("1 " + DERIVED_UNIT[key].equivalent);
+		DERIVED_UNIT[key].equivalent = u.unit;
+		DERIVED_UNIT[key].factor = u.value;
 	}
 	DERIVED_UNIT[key].prefix = 0;
 });
@@ -162,6 +164,7 @@ var hasDerived = true;
 while (hasDerived) {
 	hasDerived = false;
 	Object.keys(DERIVED_UNIT).forEach(function (key) {
+		var factor = DERIVED_UNIT[key].factor;
 		var equiv = DERIVED_UNIT[key].equivalent;
 		var prefix = DERIVED_UNIT[key].prefix;
 		var e, m, md, i, l = equiv.length;
@@ -184,6 +187,7 @@ while (hasDerived) {
 					l++;
 				});
 				prefix += (e.prefix + md.prefix) * e.power;
+				factor *= Math.pow(Number(e.factor), e.power);
 			}
 		}
 
@@ -209,6 +213,7 @@ while (hasDerived) {
 			}
 		});
 		DERIVED_UNIT[key].equivalent = equiv;
+		DERIVED_UNIT[key].factor = factor;
 		DERIVED_UNIT[key].prefix = prefix;
 	});
 }

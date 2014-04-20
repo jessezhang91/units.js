@@ -1232,8 +1232,8 @@ CONVERSION = {
 var parser = (function(){
 var parser = {trace: function trace() { },
 yy: {},
-symbols_: {"error":2,"expression":3,"ng":4,"in":5,"u":6,"EOF":7,"+":8,"-":9,"*":10,"/":11,"^":12,"NUMBER":13,"(":14,")":15,"[":16,"]":17,"{":18,"}":19,"SEP":20,"UNIT":21,"$accept":0,"$end":1},
-terminals_: {2:"error",5:"in",7:"EOF",8:"+",9:"-",10:"*",11:"/",12:"^",13:"NUMBER",14:"(",15:")",16:"[",17:"]",18:"{",19:"}",20:"SEP",21:"UNIT"},
+symbols_: {"error":2,"expression":3,"ng":4,"to":5,"u":6,"EOF":7,"+":8,"-":9,"*":10,"/":11,"^":12,"NUMBER":13,"(":14,")":15,"[":16,"]":17,"{":18,"}":19,"SEP":20,"UNIT":21,"$accept":0,"$end":1},
+terminals_: {2:"error",5:"to",7:"EOF",8:"+",9:"-",10:"*",11:"/",12:"^",13:"NUMBER",14:"(",15:")",16:"[",17:"]",18:"{",19:"}",20:"SEP",21:"UNIT"},
 productions_: [0,[3,4],[3,2],[3,2],[4,3],[4,3],[4,3],[4,3],[4,3],[4,2],[4,3],[4,3],[4,3],[4,3],[4,1],[6,3],[6,3],[6,3],[6,4],[6,3],[6,1]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
@@ -1839,7 +1839,7 @@ case 17:return 'INVALID'
 break;
 }
 },
-rules: [/^(?:\s*\n\s*)/,/^(?:[0-9]+(\.[0-9]+)?([eE][\+\-]?[0-9]+)?\b)/,/^(?:\s*\*\s*)/,/^(?:\s*\/\s*)/,/^(?:\s*-\s*)/,/^(?:\s*\+\s*)/,/^(?:\s*\^\s*)/,/^(?:\(\s*)/,/^(?:\s*\))/,/^(?:\[\s*)/,/^(?:\s*\])/,/^(?:\{\s*)/,/^(?:\s*\})/,/^(?:[A-Za-z]+)/,/^(?:\s+in\s+)/,/^(?:\s+)/,/^(?:$)/,/^(?:.)/],
+rules: [/^(?:\s*\n\s*)/,/^(?:[0-9]+(\.[0-9]+)?([eE][\+\-]?[0-9]+)?\b)/,/^(?:\s*\*\s*)/,/^(?:\s*\/\s*)/,/^(?:\s*-\s*)/,/^(?:\s*\+\s*)/,/^(?:\s*\^\s*)/,/^(?:\(\s*)/,/^(?:\s*\))/,/^(?:\[\s*)/,/^(?:\s*\])/,/^(?:\{\s*)/,/^(?:\s*\})/,/^(?:[A-Za-z]+)/,/^(?:\s+to\s+)/,/^(?:\s+)/,/^(?:$)/,/^(?:.)/],
 conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"inclusive":true}}
 };
 return lexer;
@@ -1994,6 +1994,9 @@ var units_convert = function (ng, u) {
 		};
 	}
 	var to = units_conversion(u);
+	if (!units_sameDimensions(conversion.si, to.si)) {
+		throw new Error("Dimension mismatch. " + units_toUnitString(ng.unit) + "  =/=>  " + units_toUnitString(u));
+	}
 	return {
 		value: (value - to.offset) / (to.factor * Math.pow(10, to.prefix)),
 		unit: u
@@ -2015,6 +2018,7 @@ var units_conversion = function (u) {
 			m.equivalent.forEach(function (e) {
 				si[e.symbol] = (si[e.symbol] || 0) + a.power * e.power;
 			});
+			factor *= Math.pow(Number(m.factor), a.power);
 			prefix += Number(m.prefix) * a.power;
 			break;
 		case "conversion":
@@ -2098,10 +2102,10 @@ var units_toString = function (ng) {
 	if (ustr.indexOf("10^") == 0) {
 		ustr = " * " + ustr;
 	}
-	return vstr + " " + ustr;
+	return vstr + (ustr ? " " + ustr : "");
 };
 var units_toValueString = function (v) {
-	return Number(Number(v).toPrecision(15));
+	return String(Number(Number(v).toPrecision(15)));
 };
 var units_toUnitString = function (u) {
 	var m = {}, prefix = 0;
@@ -2137,10 +2141,18 @@ var units_toUnitString = function (u) {
 		}
 	});
 	n = n.sort(function (a, b) {
-		return a.power > b.power ? 1 : -1;
+		if (a.power == b.power) {
+			return a.symbol > b.symbol ? 1 : -1;
+		} else {
+			return a.power > b.power ? 1 : -1;
+		}
 	});
 	d = d.sort(function (a, b) {
-		return a.power < b.power ? 1 : -1;
+		if (a.power == b.power) {
+			return a.symbol > b.symbol ? 1 : -1;
+		} else {
+			return a.power < b.power ? 1 : -1;
+		}
 	});
 
 	var str = [];
@@ -2172,7 +2184,7 @@ var units_toUnitString = function (u) {
 		if (n.length > 0) {
 			str.push("/");
 		}
-		if (d.length > 1 && d.length != 0) {
+		if (n.length > 0 && d.length > 1 && d.length != 0) {
 			str.push("(");
 		}
 		d.forEach(function (u, i) {
@@ -2188,7 +2200,7 @@ var units_toUnitString = function (u) {
 				str.push("^" + u.power);
 			}
 		});
-		if (d.length > 1 && d.length != 0) {
+		if (n.length > 0 && d.length > 1 && d.length != 0) {
 			str.push(")");
 		}
 	}
@@ -2200,22 +2212,60 @@ var units_toPrefixString = function (p) {
 };
 
 /*
+ * Handle gram to kilogram prefix issue
+ */
+var units_fixKilogram = function (e) {
+	if (e.unit) {
+		e.unit.forEach(function (u) {
+			if (u.symbol == "g" && u.prefix == 0) {
+				u.prefix = 3;
+				e.value /= Math.pow(10, u.power * 3);
+			}
+		});
+	} else {
+		// Just units
+		e.forEach(function (u) {
+			if (u.symbol == "g" && u.prefix == 0) {
+				u.prefix = 3;
+			}
+		});
+	}
+
+	return e;
+};
+
+/*
  * Eval
  */
 var units_eval = function (expression) {
 	var out = parser.parse(expression);
-	out.toString = function () {
-		return units_toString(out);
-	};
-	out.toValueString = function () {
-		return units_toValueString(out.value);
-	};
-	out.toUnitString = function () {
-		return units_toUnitString(out.unit);
-	};
-	out.toJSONString = function () {
-		return '{"value":' + out.toValueString() + ',"unit":"' + out.toUnitString() + '"}';
-	};
+	out = units_fixKilogram(out);
+
+	if (out.unit) {
+		out.toString = function () {
+			return units_toString(out);
+		};
+		out.toValueString = function () {
+			return units_toValueString(out.value);
+		};
+		out.toUnitString = function () {
+			return units_toUnitString(out.unit);
+		};
+		out.toJSONString = function () {
+			return '{"value":' + out.toValueString() + ',"unit":"' + out.toUnitString() + '"}';
+		};
+	} else {
+		// Just units
+		out.toString = function () {
+			return out.toUnitString();
+		};
+		out.toUnitString = function () {
+			return units_toUnitString(out);
+		};
+		out.toJSONString = function () {
+			return '"' + out.toUnitString() + '"';
+		};
+	}
 	return out;
 };
 /*
@@ -2372,7 +2422,9 @@ Object.keys(DERIVED_UNIT).forEach(function (key) {
 	if (DERIVED_UNIT[key].equivalent == "") {
 		DERIVED_UNIT[key].equivalent = [];
 	} else {
-		DERIVED_UNIT[key].equivalent = parser.parse(DERIVED_UNIT[key].equivalent);
+		var u = parser.parse("1 " + DERIVED_UNIT[key].equivalent);
+		DERIVED_UNIT[key].equivalent = u.unit;
+		DERIVED_UNIT[key].factor = u.value;
 	}
 	DERIVED_UNIT[key].prefix = 0;
 });
@@ -2382,6 +2434,7 @@ var hasDerived = true;
 while (hasDerived) {
 	hasDerived = false;
 	Object.keys(DERIVED_UNIT).forEach(function (key) {
+		var factor = DERIVED_UNIT[key].factor;
 		var equiv = DERIVED_UNIT[key].equivalent;
 		var prefix = DERIVED_UNIT[key].prefix;
 		var e, m, md, i, l = equiv.length;
@@ -2404,6 +2457,7 @@ while (hasDerived) {
 					l++;
 				});
 				prefix += (e.prefix + md.prefix) * e.power;
+				factor *= Math.pow(Number(e.factor), e.power);
 			}
 		}
 
@@ -2429,6 +2483,7 @@ while (hasDerived) {
 			}
 		});
 		DERIVED_UNIT[key].equivalent = equiv;
+		DERIVED_UNIT[key].factor = factor;
 		DERIVED_UNIT[key].prefix = prefix;
 	});
 }

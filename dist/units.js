@@ -1,4 +1,4 @@
-/*! units.js 14-04-2014 */
+/*! units.js 19-04-2014 */
 !function(global) {
     var PREFIXES, BASE_UNIT, DERIVED_UNIT, CONVERSION, parser = function() {
         function Parser() {
@@ -1199,7 +1199,7 @@
                 error: 2,
                 expression: 3,
                 ng: 4,
-                "in": 5,
+                to: 5,
                 u: 6,
                 EOF: 7,
                 "+": 8,
@@ -1207,38 +1207,36 @@
                 "*": 10,
                 "/": 11,
                 "^": 12,
-                n: 13,
+                NUMBER: 13,
                 "(": 14,
                 ")": 15,
                 "[": 16,
                 "]": 17,
                 "{": 18,
                 "}": 19,
-                NUMBER: 20,
-                SEP: 21,
-                UNIT: 22,
+                SEP: 20,
+                UNIT: 21,
                 $accept: 0,
                 $end: 1
             },
             terminals_: {
                 2: "error",
-                5: "in",
+                5: "to",
                 7: "EOF",
                 8: "+",
                 9: "-",
                 10: "*",
                 11: "/",
                 12: "^",
-                13: "n",
+                13: "NUMBER",
                 14: "(",
                 15: ")",
                 16: "[",
                 17: "]",
                 18: "{",
                 19: "}",
-                20: "NUMBER",
-                21: "SEP",
-                22: "UNIT"
+                20: "SEP",
+                21: "UNIT"
             },
             productions_: [ 0, [ 3, 4 ], [ 3, 2 ], [ 3, 2 ], [ 4, 3 ], [ 4, 3 ], [ 4, 3 ], [ 4, 3 ], [ 4, 3 ], [ 4, 2 ], [ 4, 3 ], [ 4, 3 ], [ 4, 3 ], [ 4, 3 ], [ 4, 1 ], [ 6, 3 ], [ 6, 3 ], [ 6, 3 ], [ 6, 4 ], [ 6, 3 ], [ 6, 1 ] ],
             performAction: function(yytext, yyleng, yylineno, yy, yystate, $$) {
@@ -1273,7 +1271,7 @@
                     break;
 
                   case 8:
-                    this.$ = units_power($$[$0 - 2], $$[$0]);
+                    this.$ = units_power($$[$0 - 2], Number($$[$0]));
                     break;
 
                   case 9:
@@ -1338,11 +1336,11 @@
                 4: 2,
                 6: 3,
                 9: [ 1, 4 ],
+                13: [ 1, 8 ],
                 14: [ 1, 5 ],
                 16: [ 1, 6 ],
                 18: [ 1, 7 ],
-                20: [ 1, 8 ],
-                22: [ 1, 9 ]
+                21: [ 1, 9 ]
             }, {
                 1: [ 3 ]
             }, {
@@ -1361,33 +1359,33 @@
             }, {
                 4: 21,
                 9: [ 1, 4 ],
+                13: [ 1, 8 ],
                 14: [ 1, 22 ],
                 16: [ 1, 6 ],
-                18: [ 1, 7 ],
-                20: [ 1, 8 ]
+                18: [ 1, 7 ]
             }, {
                 4: 23,
                 6: 24,
                 9: [ 1, 4 ],
+                13: [ 1, 8 ],
                 14: [ 1, 5 ],
                 16: [ 1, 6 ],
                 18: [ 1, 7 ],
-                20: [ 1, 8 ],
-                22: [ 1, 9 ]
+                21: [ 1, 9 ]
             }, {
                 4: 25,
                 9: [ 1, 4 ],
+                13: [ 1, 8 ],
                 14: [ 1, 22 ],
                 16: [ 1, 6 ],
-                18: [ 1, 7 ],
-                20: [ 1, 8 ]
+                18: [ 1, 7 ]
             }, {
                 4: 26,
                 9: [ 1, 4 ],
+                13: [ 1, 8 ],
                 14: [ 1, 22 ],
                 16: [ 1, 6 ],
-                18: [ 1, 7 ],
-                20: [ 1, 8 ]
+                18: [ 1, 7 ]
             }, {
                 5: [ 2, 14 ],
                 7: [ 2, 14 ],
@@ -1399,7 +1397,7 @@
                 15: [ 2, 14 ],
                 17: [ 2, 14 ],
                 19: [ 2, 14 ],
-                21: [ 1, 27 ]
+                20: [ 1, 27 ]
             }, {
                 5: [ 2, 20 ],
                 7: [ 2, 20 ],
@@ -1414,37 +1412,37 @@
             }, {
                 6: 28,
                 14: [ 1, 29 ],
-                22: [ 1, 9 ]
+                21: [ 1, 9 ]
             }, {
                 1: [ 2, 2 ]
             }, {
                 4: 30,
                 9: [ 1, 4 ],
+                13: [ 1, 8 ],
                 14: [ 1, 22 ],
                 16: [ 1, 6 ],
-                18: [ 1, 7 ],
-                20: [ 1, 8 ]
+                18: [ 1, 7 ]
             }, {
                 4: 31,
                 9: [ 1, 4 ],
+                13: [ 1, 8 ],
                 14: [ 1, 22 ],
                 16: [ 1, 6 ],
-                18: [ 1, 7 ],
-                20: [ 1, 8 ]
+                18: [ 1, 7 ]
             }, {
                 4: 32,
                 9: [ 1, 4 ],
+                13: [ 1, 8 ],
                 14: [ 1, 22 ],
                 16: [ 1, 6 ],
-                18: [ 1, 7 ],
-                20: [ 1, 8 ]
+                18: [ 1, 7 ]
             }, {
                 4: 33,
                 9: [ 1, 4 ],
+                13: [ 1, 8 ],
                 14: [ 1, 22 ],
                 16: [ 1, 6 ],
-                18: [ 1, 7 ],
-                20: [ 1, 8 ]
+                18: [ 1, 7 ]
             }, {
                 13: [ 1, 34 ]
             }, {
@@ -1452,14 +1450,14 @@
             }, {
                 6: 35,
                 14: [ 1, 29 ],
-                22: [ 1, 9 ]
+                21: [ 1, 9 ]
             }, {
                 6: 36,
                 14: [ 1, 29 ],
-                22: [ 1, 9 ]
+                21: [ 1, 9 ]
             }, {
                 9: [ 1, 38 ],
-                20: [ 1, 37 ]
+                13: [ 1, 37 ]
             }, {
                 5: [ 2, 9 ],
                 7: [ 2, 9 ],
@@ -1474,10 +1472,10 @@
             }, {
                 4: 23,
                 9: [ 1, 4 ],
+                13: [ 1, 8 ],
                 14: [ 1, 22 ],
                 16: [ 1, 6 ],
-                18: [ 1, 7 ],
-                20: [ 1, 8 ]
+                18: [ 1, 7 ]
             }, {
                 8: [ 1, 12 ],
                 9: [ 1, 13 ],
@@ -1507,7 +1505,7 @@
             }, {
                 6: 43,
                 14: [ 1, 29 ],
-                22: [ 1, 9 ]
+                21: [ 1, 9 ]
             }, {
                 7: [ 1, 44 ],
                 10: [ 1, 19 ],
@@ -1516,7 +1514,7 @@
             }, {
                 6: 24,
                 14: [ 1, 29 ],
-                22: [ 1, 9 ]
+                21: [ 1, 9 ]
             }, {
                 5: [ 2, 4 ],
                 7: [ 2, 4 ],
@@ -1606,7 +1604,7 @@
                 17: [ 2, 17 ],
                 19: [ 2, 17 ]
             }, {
-                20: [ 1, 45 ]
+                13: [ 1, 45 ]
             }, {
                 5: [ 2, 10 ],
                 7: [ 2, 10 ],
@@ -1901,7 +1899,7 @@
                         break;
 
                       case 1:
-                        return 20;
+                        return 13;
 
                       case 2:
                         return 10;
@@ -1937,13 +1935,13 @@
                         return 19;
 
                       case 13:
-                        return 22;
+                        return 21;
 
                       case 14:
                         return 5;
 
                       case 15:
-                        return 21;
+                        return 20;
 
                       case 16:
                         return 7;
@@ -1952,7 +1950,7 @@
                         return "INVALID";
                     }
                 },
-                rules: [ /^(?:\s*\n\s*)/, /^(?:[0-9]+(\.[0-9]+)?([eE][\+\-]?[0-9]+)?\b)/, /^(?:\s*\*\s*)/, /^(?:\s*\/\s*)/, /^(?:\s*-\s*)/, /^(?:\s*\+\s*)/, /^(?:\s*\^\s*)/, /^(?:\(\s*)/, /^(?:\s*\))/, /^(?:\[\s*)/, /^(?:\s*\])/, /^(?:\{\s*)/, /^(?:\s*\})/, /^(?:[A-Za-z]+)/, /^(?:\s+in\s+)/, /^(?:\s+)/, /^(?:$)/, /^(?:.)/ ],
+                rules: [ /^(?:\s*\n\s*)/, /^(?:[0-9]+(\.[0-9]+)?([eE][\+\-]?[0-9]+)?\b)/, /^(?:\s*\*\s*)/, /^(?:\s*\/\s*)/, /^(?:\s*-\s*)/, /^(?:\s*\+\s*)/, /^(?:\s*\^\s*)/, /^(?:\(\s*)/, /^(?:\s*\))/, /^(?:\[\s*)/, /^(?:\s*\])/, /^(?:\{\s*)/, /^(?:\s*\})/, /^(?:[A-Za-z]+)/, /^(?:\s+to\s+)/, /^(?:\s+)/, /^(?:$)/, /^(?:.)/ ],
                 conditions: {
                     INITIAL: {
                         rules: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 ],
@@ -2034,6 +2032,7 @@
             unit: conversion.si
         };
         var to = units_conversion(u);
+        if (!units_sameDimensions(conversion.si, to.si)) throw new Error("Dimension mismatch. " + units_toUnitString(ng.unit) + "  =/=>  " + units_toUnitString(u));
         return {
             value: (value - to.offset) / (to.factor * Math.pow(10, to.prefix)),
             unit: u
@@ -2046,7 +2045,7 @@
               case "derived":
                 m.equivalent.forEach(function(e) {
                     si[e.symbol] = (si[e.symbol] || 0) + a.power * e.power;
-                }), prefix += Number(m.prefix) * a.power;
+                }), factor *= Math.pow(Number(m.factor), a.power), prefix += Number(m.prefix) * a.power;
                 break;
 
               case "conversion":
@@ -2094,9 +2093,9 @@
         }), isSame;
     }, units_toString = function(ng) {
         var vstr = units_toValueString(ng.value), ustr = units_toUnitString(ng.unit);
-        return 0 == ustr.indexOf("10^") && (ustr = " * " + ustr), vstr + " " + ustr;
+        return 0 == ustr.indexOf("10^") && (ustr = " * " + ustr), vstr + (ustr ? " " + ustr : "");
     }, units_toValueString = function(v) {
-        return Number(Number(v).toPrecision(15));
+        return String(Number(Number(v).toPrecision(15)));
     }, units_toUnitString = function(u) {
         var m = {}, prefix = 0;
         u.forEach(function(e) {
@@ -2117,23 +2116,29 @@
                 power: m[s]
             });
         }), n = n.sort(function(a, b) {
-            return a.power > b.power ? 1 : -1;
+            return a.power == b.power ? a.symbol > b.symbol ? 1 : -1 : a.power > b.power ? 1 : -1;
         }), d = d.sort(function(a, b) {
-            return a.power < b.power ? 1 : -1;
+            return a.power == b.power ? a.symbol > b.symbol ? 1 : -1 : a.power < b.power ? 1 : -1;
         });
         var str = [];
         return 0 != prefix && (str.push("10^" + prefix), (n.length > 0 || d.length > 0) && str.push(" ")), 
         n.length > 0 && (n.length > 1 && 0 != d.length && str.push("("), n.forEach(function(u, i) {
             0 != i && str.push("*"), str.push(u.symbol), 1 != u.power && str.push("^" + u.power);
         }), n.length > 1 && 0 != d.length && str.push(")")), d.length > 0 && (n.length > 0 && str.push("/"), 
-        d.length > 1 && 0 != d.length && str.push("("), d.forEach(function(u, i) {
+        n.length > 0 && d.length > 1 && 0 != d.length && str.push("("), d.forEach(function(u, i) {
             0 != i && str.push("*"), str.push(u.symbol), n.length > 0 ? -1 != u.power && str.push("^" + -u.power) : str.push("^" + u.power);
-        }), d.length > 1 && 0 != d.length && str.push(")")), str.join("");
+        }), n.length > 0 && d.length > 1 && 0 != d.length && str.push(")")), str.join("");
     }, units_toPrefixString = function(p) {
         return (PREFIX_NUMBER_MAP[Number(p)] || {}).symbol;
+    }, units_fixKilogram = function(e) {
+        return e.unit ? e.unit.forEach(function(u) {
+            "g" == u.symbol && 0 == u.prefix && (u.prefix = 3, e.value /= Math.pow(10, 3 * u.power));
+        }) : e.forEach(function(u) {
+            "g" == u.symbol && 0 == u.prefix && (u.prefix = 3);
+        }), e;
     }, units_eval = function(expression) {
         var out = parser.parse(expression);
-        return out.toString = function() {
+        return out = units_fixKilogram(out), out.unit ? (out.toString = function() {
             return units_toString(out);
         }, out.toValueString = function() {
             return units_toValueString(out.value);
@@ -2141,7 +2146,13 @@
             return units_toUnitString(out.unit);
         }, out.toJSONString = function() {
             return '{"value":' + out.toValueString() + ',"unit":"' + out.toUnitString() + '"}';
-        }, out;
+        }) : (out.toString = function() {
+            return out.toUnitString();
+        }, out.toUnitString = function() {
+            return units_toUnitString(out);
+        }, out.toJSONString = function() {
+            return '"' + out.toUnitString() + '"';
+        }), out;
     };
     SI_UNIT_SYMBOL_LIST = function() {
         var list = [];
@@ -2220,11 +2231,14 @@
             i = 0; l > i; i++) map[CONVERSION[key].aliases[i]] = CONVERSION[key];
         }), map;
     }(), Object.keys(DERIVED_UNIT).forEach(function(key) {
-        DERIVED_UNIT[key].equivalent = "" == DERIVED_UNIT[key].equivalent ? [] : parser.parse(DERIVED_UNIT[key].equivalent), 
+        if ("" == DERIVED_UNIT[key].equivalent) DERIVED_UNIT[key].equivalent = []; else {
+            var u = parser.parse("1 " + DERIVED_UNIT[key].equivalent);
+            DERIVED_UNIT[key].equivalent = u.unit, DERIVED_UNIT[key].factor = u.value;
+        }
         DERIVED_UNIT[key].prefix = 0;
     });
     for (var hasDerived = !0; hasDerived; ) hasDerived = !1, Object.keys(DERIVED_UNIT).forEach(function(key) {
-        var e, m, md, i, equiv = DERIVED_UNIT[key].equivalent, prefix = DERIVED_UNIT[key].prefix, l = equiv.length;
+        var e, m, md, i, factor = DERIVED_UNIT[key].factor, equiv = DERIVED_UNIT[key].equivalent, prefix = DERIVED_UNIT[key].prefix, l = equiv.length;
         for (i = 0; l > i; i++) e = equiv[i], m = UNIT_MAP[e.symbol], "derived" == m.type && (hasDerived = !0, 
         equiv.splice(i, 1), i--, l--, md = UNIT_MAP[m.symbol], md.equivalent.forEach(function(mde) {
             equiv.push({
@@ -2232,7 +2246,7 @@
                 prefix: mde.prefix,
                 symbol: mde.symbol
             }), l++;
-        }), prefix += (e.prefix + md.prefix) * e.power);
+        }), prefix += (e.prefix + md.prefix) * e.power, factor *= Math.pow(Number(e.factor), e.power));
         var um, umap = {};
         for (i = 0; l > i; i++) e = equiv[i], um = umap[e.symbol] || {
             power: 0,
@@ -2241,6 +2255,6 @@
         }, um.power += e.power, prefix += e.prefix * e.power, umap[e.symbol] = um;
         equiv = [], Object.keys(umap).forEach(function(k) {
             um = umap[k], 0 != um.power && equiv.push(umap[k]);
-        }), DERIVED_UNIT[key].equivalent = equiv, DERIVED_UNIT[key].prefix = prefix;
+        }), DERIVED_UNIT[key].equivalent = equiv, DERIVED_UNIT[key].factor = factor, DERIVED_UNIT[key].prefix = prefix;
     });
 }(this);
